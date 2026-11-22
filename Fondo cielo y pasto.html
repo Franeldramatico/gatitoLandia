@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fondo cielo y pasto</title>
+<style>
+  :root { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(
+      to bottom,
+      #84c3fb 0%,
+      #8cc8fc 25%,
+      #a3d2fc 45%,
+      #cfe7fd 62%,
+      #f3f9ff 76%,
+      #ffffff 88%,
+      #ffffff 100%
+    );
+  }
+  /* Contenedor del pasto, anclado abajo */
+  #pasto {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  /* Aquí puedes poner tu contenido encima del fondo */
+  main { position: relative; z-index: 1; }
+</style>
+</head>
+<body>
+
+<svg id="pasto" viewBox="0 0 1024 150" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+
+<main><!-- tu contenido --></main>
+
+<script>
+(function () {
+  const svg = document.getElementById('pasto');
+  const NS = 'http://www.w3.org/2000/svg';
+
+  // Generador pseudoaleatorio con semilla (el dibujo siempre sale igual)
+  let s = 7;
+  const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  const rr = (a, b) => a + rnd() * (b - a);
+  const pick = arr => arr[Math.floor(rnd() * arr.length)];
+
+  const cx = 512, cy = 88;          // centro del montículo
+  const RX = 490, RY = 46;          // radios del montículo
+
+  function el(name, attrs, parent) {
+    const e = document.createElementNS(NS, name);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    (parent || svg).appendChild(e);
+    return e;
+  }
+
+  // Punto aleatorio dentro de una elipse (escala 0..1)
+  function pointIn(scale) {
+    const a = rnd() * Math.PI * 2;
+    const r = Math.sqrt(rnd()) * scale;
+    return [cx + Math.cos(a) * RX * r, cy + Math.sin(a) * RY * r];
+  }
+
+  const base   = ['#7fc61c', '#8fd021', '#9bd725', '#74bd18'];
+  const medios = ['#a5de2d', '#b3e63a', '#94d323'];
+  const claros = ['#c9f052', '#d3f464', '#bfe94a'];
+
+  // 1) Capa base: base verde sólida
+  el('ellipse', { cx, cy, rx: RX - 10, ry: RY - 4, fill: '#86cc1e' });
+
+  // 2) Hojitas ovaladas de la base (pinceladas)
+  const g1 = el('g', {});
+  for (let i = 0; i < 520; i++) {
+    const [x, y] = pointIn(1.02);
+    el('ellipse', {
+      cx: x.toFixed(1), cy: y.toFixed(1),
+      rx: rr(9, 19).toFixed(1), ry: rr(4, 7.5).toFixed(1),
+      fill: pick(base),
+      transform: `rotate(${rr(-28, 28).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})`
+    }, g1);
+  }
+
+  // 3) Flequillo del borde (hojas que sobresalen del contorno)
+  const g2 = el('g', {});
+  for (let i = 0; i < 230; i++) {
+    const a = rnd() * Math.PI * 2;
+    const k = rr(0.93, 1.06);
+    const x = cx + Math.cos(a) * RX * k;
+    const y = cy + Math.sin(a) * RY * k * 1.08;
+    // la hoja apunta hacia afuera del centro
+    const ang = Math.atan2(Math.sin(a) * RY, Math.cos(a) * RX) * 180 / Math.PI;
+    el('ellipse', {
+      cx: x.toFixed(1), cy: y.toFixed(1),
+      rx: rr(10, 17).toFixed(1), ry: rr(3.2, 5.5).toFixed(1),
+      fill: pick(i % 3 ? base : medios),
+      transform: `rotate(${(ang + rr(-14, 14)).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})`
+    }, g2);
+  }
+
+  // 4) Pinceladas medias y claras (volumen)
+  const g3 = el('g', {});
+  for (let i = 0; i < 170; i++) {
+    const [x, y] = pointIn(0.95);
+    el('ellipse', {
+      cx: x.toFixed(1), cy: y.toFixed(1),
+      rx: rr(8, 17).toFixed(1), ry: rr(3.5, 6.5).toFixed(1),
+      fill: pick(medios),
+      transform: `rotate(${rr(-22, 22).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})`
+    }, g3);
+  }
+  const g4 = el('g', { opacity: '0.9' });
+  for (let i = 0; i < 70; i++) {
+    const [x, y] = pointIn(0.9);
+    el('ellipse', {
+      cx: x.toFixed(1), cy: y.toFixed(1),
+      rx: rr(6, 13).toFixed(1), ry: rr(3.5, 6).toFixed(1),
+      fill: pick(claros),
+      transform: `rotate(${rr(-15, 15).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})`
+    }, g4);
+  }
+
+  // 5) Hojas del borde superior más claras
+  const g5 = el('g', {});
+  for (let i = 0; i < 90; i++) {
+    const x = rr(cx - RX * 0.9, cx + RX * 0.9);
+    const t = (x - cx) / RX;
+    const y = cy - RY * Math.sqrt(Math.max(0, 1 - t * t)) * rr(0.8, 1.02);
+    el('ellipse', {
+      cx: x.toFixed(1), cy: y.toFixed(1),
+      rx: rr(8, 14).toFixed(1), ry: rr(3, 5).toFixed(1),
+      fill: pick(medios.concat(claros)),
+      transform: `rotate(${rr(-30, 30).toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})`
+    }, g5);
+  }
+
+  // 6) Briznas verde oscuro (trazos cortos y redondeados)
+  function blade(x, y, len, ang, w) {
+    const rad = ang * Math.PI / 180;
+    el('line', {
+      x1: x.toFixed(1), y1: y.toFixed(1),
+      x2: (x + Math.sin(rad) * len).toFixed(1),
+      y2: (y - Math.cos(rad) * len).toFixed(1),
+      stroke: pick(['#3da72f', '#44ad33', '#369f2c']),
+      'stroke-width': w, 'stroke-linecap': 'round'
+    }, g6);
+  }
+  const g6 = el('g', {});
+
+  // Grupos en el borde superior, abiertos en abanico
+  for (let i = 0; i < 26; i++) {
+    const x = rr(cx - RX * 0.93, cx + RX * 0.93);
+    const t = (x - cx) / RX;
+    const top = cy - RY * Math.sqrt(Math.max(0, 1 - t * t)) + 4;
+    const n = Math.random() < 0.5 ? 2 : 3;
+    for (let j = 0; j < n; j++) {
+      const ang = (j - (n - 1) / 2) * rr(22, 34) + t * 28;
+      blade(x + (j - n / 2) * 7, top + rr(0, 4), rr(11, 17), ang, rr(5.5, 7));
+    }
+  }
+  // Briznas sueltas dentro del pasto
+  for (let i = 0; i < 12; i++) {
+    const [x, y] = pointIn(0.8);
+    const n = rnd() < 0.5 ? 2 : 3;
+    for (let j = 0; j < n; j++) {
+      blade(x + j * 7, y + rr(-2, 2), rr(10, 14), rr(-10, 12), 6);
+    }
+  }
+})();
+</script>
+</body>
+</html>
