@@ -21,11 +21,21 @@ const loadImage=src=>new Promise((resolve,reject)=>{const i=new Image();i.onload
 export async function photograph(world,scrollLeft,viewportWidth,caption){
  const svg=world.querySelector('.illustration').cloneNode(true);svg.setAttribute('xmlns','http://www.w3.org/2000/svg');svg.setAttribute('width','1600');svg.setAttribute('height','680')
  const img=await loadImage('data:image/svg+xml;charset=utf-8,'+encodeURIComponent(new XMLSerializer().serializeToString(svg)))
- const width=world.offsetWidth,height=world.offsetHeight,scale=Math.min(2,1600/viewportWidth),canvas=document.createElement('canvas')
- canvas.width=Math.round(viewportWidth*scale);canvas.height=Math.round(height*scale)+66
- const ctx=canvas.getContext('2d');ctx.save();ctx.scale(scale,scale);ctx.translate(-scrollLeft,0);ctx.drawImage(img,0,0,width,height)
+ const width=world.offsetWidth,height=world.offsetHeight,scale=Math.min(2,1600/viewportWidth),pad=24,foot=84,canvas=document.createElement('canvas')
+ const sceneW=Math.round(viewportWidth*scale),sceneH=Math.round(height*scale)
+ canvas.width=sceneW+pad*2;canvas.height=sceneH+pad+foot
+ const ctx=canvas.getContext('2d')
+ ctx.fillStyle='#fbf4e4';ctx.fillRect(0,0,canvas.width,canvas.height)
+ ctx.strokeStyle='rgba(154,128,92,0.45)';ctx.lineWidth=2;ctx.strokeRect(10,10,canvas.width-20,canvas.height-20)
+ ctx.save();ctx.translate(pad,pad);ctx.beginPath();ctx.rect(0,0,sceneW,sceneH);ctx.clip();ctx.scale(scale,scale);ctx.translate(-scrollLeft,0);ctx.drawImage(img,0,0,width,height)
  for(const actor of world.querySelectorAll('.actor')){const cut=actor.querySelector('img');await cut.decode();const h=Math.min(actor.offsetHeight,actor.offsetWidth*cut.naturalHeight/cut.naturalWidth),w=h*cut.naturalWidth/cut.naturalHeight
   ctx.save();ctx.translate(actor.offsetLeft,actor.offsetTop);const transform=getComputedStyle(actor).transform;ctx.scale(transform!=='none'&&new DOMMatrix(transform).a<0?-1:1,1);ctx.drawImage(cut,-w/2,-h,w,h);ctx.restore()}
- ctx.restore();ctx.fillStyle='#fff2da';ctx.fillRect(0,canvas.height-66,canvas.width,66);ctx.fillStyle='#35574a';ctx.font='22px Georgia';ctx.fillText(caption,18,canvas.height-24,canvas.width-36)
+ ctx.restore()
+ ctx.strokeStyle='#d6c3a1';ctx.lineWidth=1.5;ctx.strokeRect(pad,pad,sceneW,sceneH)
+ ctx.fillStyle='#2f5448';ctx.font='italic 600 22px Georgia, serif';ctx.fillText(caption,pad+6,canvas.height-32,sceneW-130)
+ ctx.save();ctx.translate(canvas.width-pad-44,canvas.height-42);ctx.rotate(-0.14);ctx.strokeStyle='rgba(182,93,67,0.72)';ctx.fillStyle='rgba(182,93,67,0.72)';ctx.lineWidth=1.8
+ ctx.beginPath();ctx.arc(0,0,26,0,Math.PI*2);ctx.stroke()
+ ctx.beginPath();ctx.arc(0,0,21,0,Math.PI*2);ctx.lineWidth=0.9;ctx.stroke()
+ ctx.font='700 8px sans-serif';ctx.textAlign='center';ctx.fillText('VILLA BIGOTES',0,-2);ctx.fillText('ED. 01',0,9);ctx.restore()
  const blob=await new Promise(r=>canvas.toBlob(r,'image/png'));if(!blob)throw Error();download(blob,'villa-bigotes-postal.png')
 }

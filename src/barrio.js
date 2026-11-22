@@ -16,7 +16,7 @@ export function barrio({s,node,exit,say,me,them,obj,card,go,map,nearby}){
    }
  }
  if(s.scene==='room'){
-   node(33,43,'Tras la pared','Through the wall',()=>say(s.actor?
+   node(29,43,'Tras la pared','Through the wall',()=>say(s.actor?
      [me('Tararea la canción del tren. En el 18 las paredes devuelven un eco menos solitario.','She hums the train song. The walls of number 18 answer with a less lonely echo.')]:
      [me('Desde el 15 oye tres notas. El tren ya se fue, pero alguien sigue cantando su canción.','From number 15 he hears three notes. The train has left, but someone still sings its song.')],
      ()=>{s.song=true;finish('song',s.actor?'Canté para hacerme compañía.':'Alguien cantaba al otro lado.',s.actor?'I sang to keep myself company.':'Someone sang on the other side.')}),'♫')

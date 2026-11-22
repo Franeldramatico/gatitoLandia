@@ -61,14 +61,16 @@ export function useStory(prefs){
     }
     switch(s.scene){
       case 'air':node(71,55,'Buscar alquiler','Find a rental',()=>say([me('Franxito guarda su tarjeta de embarque. Necesita una dirección que escribir al dorso.','Franxito pockets his boarding pass. He needs an address to write on the back.'),obj('Viviendas Bigotes. Queda un estudio libre; pase por recepción.','Whiskers Apartments. One studio available; please visit reception.')],()=>go('desk')),'⌕');break
-      case 'rail':node(50,67,'Mirar el celular','Check phone',()=>say([me('Aranxita se frota un ojo. Casi se pasa de estación.','Aranxita rubs one eye. She nearly missed her stop.'),obj('Alquiler cerca de la estación. Recepción abierta de noche.','Flat near the station. Reception open at night.'),me('A dos calles… Por favor, que todavía esté libre.','Two streets away… Please still be available.')],()=>go('desk')),'▣');break
+      case 'rail':
+        node(22,68,'Ver el tren','Watch the train',()=>say([me('El expreso nocturno exhala vapor tibio sobre los adoquines. Acaba de llegar a la última estación.','The night express breathes warm mist over the tiles. It has just arrived at the final station.')]),'◇')
+        node(50,67,'Mirar el celular','Check phone',()=>say([me('Aranxita se frota un ojo. Casi se pasa de estación.','Aranxita rubs one eye. She nearly missed her stop.'),obj('Alquiler cerca de la estación. Recepción abierta de noche.','Flat near the station. Reception open at night.'),me('A dos calles… Por favor, que todavía esté libre.','Two streets away… Please still be available.')],()=>go('desk')),'▣');break
       case 'desk':node(64,51,'Hablar con recepción','Ask the receptionist',()=>say([obj(`Está libre el ${unit.value}. Ventana al patio y una llave que se atasca un poquito.`,`Number ${unit.value} is free. Courtyard view, slightly sticky key.`),me('¿Así, girando despacito?','Like this, turning it gently?'),obj('Exacto. Esta es tu casa.','Exactly. Welcome home.')],()=>{s.key=true;go(s.actor?'hall':'room')}),'⚿');break
       case 'room':
-        exit(17,55,'hall','Salir al pasillo','To the hallway')
+        exit(14,58,'hall','Salir al pasillo','To the hallway')
         if(s.decor<12)node(73,62,`Decorar · ${s.decor}/12`,`Decorate · ${s.decor}/12`,()=>{s.decor=Math.min(12,s.decor+1)},'✿')
         else node(73,62,'Habitación completa','Room complete',()=>{},'✧')
-        node(49,85,'Dormir','Sleep',()=>say([me('Cierra los ojos. Al otro lado de la pared, alguien también apaga la luz.','Eyes closed. Across the wall, someone else switches off the light.')],()=>{s.day++;s.period=0;s.x=43;s.y=84;if(s.dateDay===s.day)say([me(s.datePeriod?'Esta tarde hay merienda en el café.':'Esta mañana hay una silla para mí en el café.',s.datePeriod?'Our café date is this afternoon.':'There’s a seat waiting for me at the café this morning.')])}),'☾')
-        if(!s.actor)exit(78,35,'market','Ir de compras','Go shopping')
+        node(33,83,'Dormir','Sleep',()=>say([me('Cierra los ojos. Al otro lado de la pared, alguien también apaga la luz.','Eyes closed. Across the wall, someone else switches off the light.')],()=>{s.day++;s.period=0;s.x=43;s.y=84;if(s.dateDay===s.day)say([me(s.datePeriod?'Esta tarde hay merienda en el café.':'Esta mañana hay una silla para mí en el café.',s.datePeriod?'Our café date is this afternoon.':'There’s a seat waiting for me at the café this morning.')])}),'☾')
+        if(!s.actor)exit(73,32,'market','Ir de compras','Go shopping')
         break
       case 'hall':
         if(s.actor&&!s.bag){node(70,76,'Recoger las naranjas','Gather the oranges',()=>game('orange',()=>say([me('¡Espera! Yo alcanzo la que rueda hacia la escalera.','Wait! I’ll catch the one rolling towards the stairs.'),them('Soy Franxito, del 15… Mi bolsa eligió un mal día para aprender a volar.','I’m Franxito, number 15… Bad day for my bag to learn to fly.'),me('Aranxita, del 18. Repartimos el peso y llegamos juntos.','Aranxita, number 18. Let’s share the load and walk together.')],()=>{s.bag=true;encounter()})),'♡');break}
