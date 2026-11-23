@@ -2,6 +2,8 @@
 
 Un simulador narrativo hecho con Vue 3 y Vite. Franxito vive en el departamento 15 y Aranxita en el 18. La postal que elijas en la portada determina cómo llegas al edificio y cómo conoces al otro gato.
 
+**Jugar en la web:** https://franeldramatico.github.io/gatitoLandia/
+
 ## Iniciar el proyecto
 
 **Para jugar con doble clic:** abre `Villa Bigotes.html`. Es una edición portátil con los escenarios y los gatos incorporados. `npm run build` la regenera en la raíz y en `dist/`. Para continuar una partida de la web, usa la misma dirección y navegador en los que la guardaste, o importa su copia en la edición portátil.

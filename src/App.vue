@@ -3,11 +3,14 @@ import { reactive, computed, ref, watch, onMounted, onUnmounted, nextTick, defin
 import { useStory, titles } from './useStory.js'
 import { fieldSound } from './soundscape.js'
 import MenuArt from './MenuArt.vue'
+import { enterLandscape, leaveLandscape, stagePoint } from './landscape.js'
 import UiIcon from './components/UiIcon.vue'
 import portraitF from './portraits/retrato-franxito.webp?inline'
 import portraitA from './portraits/retrato-aranxita.webp?inline'
 import { objects, blocked, pathTo } from './paths.js'
 import { rain } from './barrio.js'
+import sillyTrack from '../musica infantl.mp3'
+import metalTrack from '../musica metal.mp3'
 
 const Illustration = defineAsyncComponent(() => import('./scene/Illustration.vue'))
 const KiteFlight = defineAsyncComponent(() => import('./KiteFlight.vue'))
@@ -15,7 +18,7 @@ const Directory = defineAsyncComponent(() => import('./Directory.vue'))
 import './postales.css'
 import './living.css'
 
-const prefs = reactive({ lang: 'es', volume: 35, ambient: 22, voice: 35, text: 100 })
+const prefs = reactive({ lang: 'es', volume: 35, ambient: 22, voice: 35, text: 100, track: 'silly' })
 try { Object.assign(prefs, JSON.parse(localStorage.getItem('villaPrefs'))) } catch {}
 watch(
   prefs,
@@ -31,7 +34,7 @@ const assets = import.meta.glob('../habitantes/*.png', { eager: true, import: 'd
 const img = (n, p) => assets[`../habitantes/${n.toLowerCase()}-${p}.png`]
 const play = computed(() => page.value === 'play')
 const night = computed(() => s.scene === 'rail' || s.period === 2)
-const companionX = computed(() => (s.scene === 'hall' ? 76 : 64))
+const companionX = computed(() => (s.scene === 'wedding' ? 54 : s.scene === 'hall' ? 76 : 64))
 const moving = ref(false), bubble = ref(null), world = ref(null), replace = ref(null), coverLunar = ref(false)
 const camera = ref(null), album = ref(false), offset = ref(0), stageWidth = ref(innerWidth), viewportWidth = ref(innerWidth), stride = ref(false)
 const photo = ref(false), pending = ref(null), notice = ref(''), offline = ref(false)
@@ -118,6 +121,26 @@ function select(i) {
   start(i)
 }
 
+const songs = {
+  silly: { title: 'cancion silly :3', url: sillyTrack },
+  metal: { title: 'cancion super silly >:3', url: metalTrack },
+}
+const soundtrack = ref(null)
+let currentSong
+function syncMusic() {
+  const player = soundtrack.value
+  if (!player) return
+  if ((!play.value && page.value !== 'settings') || !prefs.ambient || document.hidden) {
+    player?.pause()
+    return
+  }
+  const song = songs[prefs.track] ?? songs.silly
+  if (song !== currentSong) { player.src = song.url; currentSong = song }
+  player.volume = prefs.ambient / 100
+  player.play().catch(() => {})
+}
+watch([page, () => prefs.track, () => prefs.ambient], syncMusic)
+
 function walk(x, y) {
   if (dialog.value || blocked(s, x, y)) return
   if (x !== s.x) facing.value = Math.sign(x - s.x)
@@ -139,8 +162,7 @@ function approach(x, y, done) {
 }
 
 function point(e) {
-  const r = world.value.getBoundingClientRect()
-  approach(((e.clientX - r.left) / r.width) * 100, ((e.clientY - r.top) / r.height) * 100)
+  approach(...stagePoint(e, world.value))
 }
 
 function activate(n) {
@@ -179,7 +201,7 @@ const anchor = computed(() => {
   const who = line.value?.[0]
   return who === 'me' ? [s.x, s.y - 24] : who === 'other' ? [companionX.value, 59] : who === 'door' ? [81, 42] : s.scene === 'rail' ? [50, 62] : [65, 48]
 })
-const bubbleX = computed(() => `clamp(min(43vw, 183px), ${project(anchor.value[0])}px, calc(100vw - min(43vw, 183px)))`)
+const bubbleX = computed(() => `clamp(min(43%, 183px), ${project(anchor.value[0])}px, calc(100% - min(43%, 183px)))`)
 const speaker = computed(() => ({
   me: name.value,
   other: other.value,
@@ -261,7 +283,7 @@ watch(line, async v => {
   await nextTick()
   if (v) {
     if (camera.value) {
-      camera.value.scrollLeft = (anchor.value[0] / 100) * stageWidth.value - innerWidth / 2
+      camera.value.scrollLeft = (anchor.value[0] / 100) * stageWidth.value - viewportWidth.value / 2
       syncCamera()
     }
     bubble.value?.focus({ preventScroll: true })
@@ -272,6 +294,7 @@ watch(line, async v => {
 })
 
 watch([page, dialog, map, photo, () => s.scene], stop)
+watch(play, active => active ? enterLandscape() : leaveLandscape(), { flush: 'sync' })
 watch(play, v => {
   if (v) {
     for (const p of ['camina', 'quieta', 'pasito', 'habla']) {
@@ -317,6 +340,7 @@ watch(() => s.points, (nv, ov) => {
 watch(play, v => { if (v) coverLunar.value = false })
 
 onMounted(() => {
+  document.addEventListener('visibilitychange', syncMusic)
   window.addEventListener('resize', pan)
   window.addEventListener('pagehide', flush)
   window.addEventListener('keydown', keyboard)
@@ -324,6 +348,8 @@ onMounted(() => {
   window.addEventListener('blur', stop)
 })
 onUnmounted(() => {
+  document.removeEventListener('visibilitychange', syncMusic)
+  soundtrack.value?.pause()
   clearInterval(ambience)
   clearTimeout(arrivalTimer)
   clearTimeout(burstTimer)
@@ -338,6 +364,7 @@ onUnmounted(() => {
 
 <template>
   <main class="viewport" :class="{ playing: play, 'lunar-hover': !play && coverLunar }" :style="{ '--reading': prefs.text / 100 }">
+    <audio ref="soundtrack" loop preload="none"></audio>
     <template v-if="!play">
       <MenuArt :lunar="coverLunar" />
       <div class="wash"></div>
@@ -443,6 +470,12 @@ onUnmounted(() => {
             <label>
               <span>{{ t('Ambiente', 'Ambience') }} · {{ prefs.ambient }}%</span>
               <input type="range" v-model.number="prefs.ambient" />
+            </label>
+            <label>
+              <span>{{ t('Canción de ambiente', 'Background song') }}</span>
+              <select v-model="prefs.track">
+                <option v-for="(song, id) in songs" :key="id" :value="id">{{ song.title }}</option>
+              </select>
             </label>
             <label>
               <span>{{ t('Voz', 'Voice') }} · {{ prefs.voice }}%</span>
@@ -604,6 +637,9 @@ onUnmounted(() => {
           <UiIcon :name="['sun', 'twilight', 'moon'][s.period]" :size="12" />
         </small>
         <h2>{{ place }}</h2>
+        <small v-if="s.scene === 'room' && s.decor < 12 && s.decorDay === s.day && s.decorToday >= 3">
+          {{ t('La próxima caja llega mañana.', 'The next box arrives tomorrow.') }}
+        </small>
         <span class="hud-bond">
           <span>{{ bond }}</span>
           <span aria-hidden="true">·</span>
@@ -635,6 +671,10 @@ onUnmounted(() => {
       >
         <UiIcon name="album" :size="15" />
         <span>{{ t('Álbum', 'Album') }} · {{ s.album.length }}</span>
+      </button>
+      <button v-if="!photo && !dialog && !mini && !album && !map" class="album-btn song-switch"
+        :title="t('Cambiar canción', 'Switch song')" @click="prefs.track = prefs.track === 'metal' ? 'silly' : 'metal'">
+        ♫ {{ songs[prefs.track]?.title }}
       </button>
 
       <div v-if="map" class="veil">

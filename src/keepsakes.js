@@ -8,7 +8,7 @@ export function decodeSave(text){
  const {version,route:v}=JSON.parse(text)
  if(version!==1||!v||![0,1].includes(v.actor)||!Object.hasOwn(titles,v.scene)||!Number.isInteger(v.day)||v.day<1)throw Error()
  const out={actor:v.actor,scene:v.scene,day:v.day}
- for(const [k,max] of Object.entries({x:100,y:100,period:2,points:1000,decor:3,...Object.fromEntries(Object.entries(extras()).filter(([,v])=>typeof v==='number').map(([k])=>[k,1e7]))})){
+ for(const [k,max] of Object.entries({x:100,y:100,period:2,points:1000,decor:12,...Object.fromEntries(Object.entries(extras()).filter(([,v])=>typeof v==='number').map(([k])=>[k,1e7]))})){
   const n=v[k]??0;if(!Number.isFinite(n)||n<0||n>max)throw Error();out[k]=n
  }
  for(const k of ['met','bag','key','bought','wed','gift',...Object.keys(extras()).filter(k=>typeof extras()[k]==='boolean')])out[k]=v[k]===true

@@ -13,7 +13,7 @@ self.addEventListener('message',e=>{if(e.data==='download')e.waitUntil((async()=
 self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||!e.request.url.startsWith(scope))return;e.respondWith((async()=>{const c=await caches.open(id);if(e.request.mode==='navigate'){try{return await fetch(e.request)}catch{const r=await c.match(new URL('index.html',scope),{ignoreVary:true});return r||Response.error()}}return (await c.match(e.request,{ignoreVary:true}))||fetch(e.request)})())});`})
 }}}
 export default defineConfig({
-  base: './',
+  base: process.env.GH_PAGES === 'true' ? '/gatitoLandia/' : './',
   plugins: [vue(), offlineEdition()],
   server: { host: '0.0.0.0', port: 3000, allowedHosts: true },
   preview: { host: '0.0.0.0', port: 3000, allowedHosts: true },

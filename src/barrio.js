@@ -1,5 +1,5 @@
 // Small stories share the same clock, place and postcard album as the main route.
-export const extras=()=>({dateDay:0,datePeriod:0,teaKnown:false,seedDay:0,flower:false,mailDay:0,reply:false,song:false,visit:false,ritual:0})
+export const extras=()=>({decorDay:0,decorToday:0,dateDay:0,datePeriod:0,teaKnown:false,seedDay:0,flower:false,mailDay:0,reply:false,song:false,visit:false,ritual:0})
 export const rain=day=>day%3===2
 export function barrio({s,node,exit,say,me,them,obj,card,go,map,nearby}){
  const moment=s.actor?0:1, drink=s.actor?['té con canela','cinnamon tea']:['leche con vainilla','vanilla milk']

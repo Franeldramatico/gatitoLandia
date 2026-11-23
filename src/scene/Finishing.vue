@@ -284,10 +284,6 @@ defineProps({ scene: String, night: Boolean, period: { type: Number, default: 0 
 
   <!-- Garden Finishing -->
   <g v-else-if="scene === 'garden'">
-    <use v-if="period < 2" class="cloud-drift" href="#cloud" transform="translate(358 43)" />
-    <use v-if="period < 2" class="cloud-drift slow" href="#cloud" transform="translate(52 56) scale(.73)" />
-    <use href="#awning" transform="translate(135 125) scale(.35)" />
-    <use href="#awning" transform="translate(289 125) scale(.35)" />
     <path d="M48 208q76-21 144-7m88 4q77-18 113-15" stroke="#6f966d" stroke-width="9" stroke-linecap="round" fill="none" />
     <g v-for="i in 38" :key="i" :transform="`translate(${(i * 113) % 800} ${258 + (i * 29) % 80}) scale(${0.45 + (i % 4) * 0.12})`">
       <path d="M0 1q-1 7 2 11" fill="none" stroke="#607e5c" stroke-width="2" />

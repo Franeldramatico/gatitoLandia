@@ -1,6 +1,8 @@
 <script setup>
 import Street from './Street.vue'
 import Garden from './Garden.vue'
+import Wedding from './Wedding.vue'
+import receptionist from '../portraits/recepcionista.webp?inline'
 import PrintStudio from './PrintStudio.vue'
 import Finishing from './Finishing.vue'
 
@@ -47,7 +49,8 @@ defineProps({
 
     <PrintStudio />
 
-    <Garden v-if="scene === 'garden'" :night="night" :period="period" :rainy="rainy" />
+    <Wedding v-if="scene === 'wedding'" />
+    <Garden v-else-if="scene === 'garden'" :night="night" :period="period" :rainy="rainy" />
     <Street v-else-if="['hall', 'roof', 'cafe'].includes(scene)" :place="scene === 'hall' ? 'lobby' : scene" :period="period" />
 
     <!-- Airport, Midnight Station & Cover Skyline -->
@@ -455,12 +458,15 @@ defineProps({
         <rect v-for="i in 6" :key="i" :x="292 + (i - 1) * 84" y="162" width="68" height="48" rx="2" />
       </g>
 
+      <g :transform="scene === 'desk' ? 'translate(88 -15) scale(.82 .72)' : undefined">
       <rect x="392" y="50" width="252" height="86" rx="5" fill="#463a33" opacity=".14" />
       <rect x="390" y="48" width="252" height="85" rx="4" fill="#567367" stroke="#ecd9b7" stroke-width="7" />
       <rect x="399" y="57" width="234" height="67" rx="2" fill="none" stroke="#85a295" stroke-width="1.2" />
       <text x="516" y="96" fill="#fbf0d2" text-anchor="middle" font-size="18" font-weight="600" letter-spacing="3.5" font-family="Fraunces, Georgia, serif">
         {{ scene === 'desk' ? 'VILLA BIGOTES' : 'MERCADO' }}
       </text>
+      </g>
+      <image v-if="scene === 'desk'" :href="receptionist" x="508" y="87" width="68" height="92" />
       <path d="M300 164h429v84H300Z" fill="url(#walnut)" stroke="#62463a" stroke-width="1.5" />
       <path d="M290 158h449v12H290Z" rx="3" fill="#6f5349" stroke="#4f3a32" stroke-width="1.2" />
       <path d="M294 158h441" stroke="#c9ae92" stroke-width="1" opacity=".5" />
@@ -479,7 +485,7 @@ defineProps({
       </g>
     </g>
 
-    <Finishing v-if="scene !== 'room'" :scene="scene" :night="night" :period="period" :rainy="rainy" />
+    <Finishing v-if="scene !== 'wedding' && scene !== 'room'" :scene="scene" :night="night" :period="period" :rainy="rainy" />
 
     <!-- Café Shelf & Flower Vase -->
     <g v-if="scene === 'cafe'">

@@ -1,6 +1,7 @@
 {
   "id":"./","name":"Villa Bigotes · GatitoLandia","short_name":"Villa Bigotes",
   "start_url":"./","scope":"./","display":"standalone","lang":"es",
+  "orientation":"landscape",
   "background_color":"#fff2da","theme_color":"#35574a",
   "icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"}]
 }

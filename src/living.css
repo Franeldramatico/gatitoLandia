@@ -12,6 +12,31 @@
   display: none;
 }
 
+@media (pointer: fine) {
+  * { scrollbar-color: #7c927d #f2ead7; scrollbar-width: thin; }
+  .camera-scroll { scrollbar-width: thin; }
+  .camera-scroll::-webkit-scrollbar { display: block; height: 9px; }
+}
+
+
+@media (pointer: coarse) and (orientation: portrait) {
+  .viewport.playing {
+    position: fixed; top: 0; left: 100vw;
+    width: 100dvh; height: 100vw;
+    transform: rotate(90deg); transform-origin: top left;
+  }
+  .playing .camera-scroll .world { width: 100%; }
+  .playing .camera-scroll .actor { width: clamp(52px, 16vw, 106px); }
+  .playing .pan-tip { display: none; }
+  .playing .sheet { max-height: 91vw; overflow: auto; }
+  .playing .speech { max-width: min(80dvh, 360px); }
+}
+
+.album-btn.song-switch {
+  top: calc(max(16px, env(safe-area-inset-top)) + 101px);
+  font-size: 12px;
+}
+
 .world {
   isolation: isolate;
 }
@@ -416,6 +441,7 @@
   position: absolute;
   inset: 0;
   background: #f5ebd4;
+  opacity: 0;
   pointer-events: none;
   z-index: 3;
   animation: pageTurn 0.45s ease-out both;

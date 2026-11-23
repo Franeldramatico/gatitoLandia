@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { stagePoint } from './landscape.js'
 
 const props = defineProps({ count: Number, en: Boolean })
 const emit = defineEmits(['catch'])
@@ -15,8 +16,7 @@ function steer(nx, ny) {
 }
 
 function pointer(e) {
-  const r = field.value.getBoundingClientRect()
-  steer(((e.clientX - r.left) / r.width) * 100, ((e.clientY - r.top) / r.height) * 100)
+  steer(...stagePoint(e, field.value))
 }
 
 function keys(e) {
